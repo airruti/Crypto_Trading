@@ -1,0 +1,3 @@
+Simple trading bot that consumes the Coinbase Pro API in order to automate trades. Setting parameters within the application is pretty self-explanatory.
+I haven't decided yet whether I want to specify pairings, or automatically pair to USD. 
+The bot waits 450 seconds per every check to update the price and determine whether it will buy or sell.
