@@ -66,12 +66,12 @@ def start():
     oldPriceBTC = richMethods.currentPrices("BTC")
     oldPriceBTC = float(oldPriceBTC)
     
-    time.sleep(wait)
+    countdown(wait)
     
     old2PriceBTC = richMethods.currentPrices("BTC")
     old2PriceBTC = float(old2PriceBTC)
     
-    time.sleep(wait)
+    countdown(wait)
     
     newPriceBTC = richMethods.currentPrices("BTC")
     newPriceBTC = float(newPriceBTC)
@@ -94,4 +94,4 @@ print('Waiting for changes...')
 #     start()
 
 richMethods.viewAccounts()
-richMethods.viewSingleAccount("link")
+richMethods.currentPrices()
