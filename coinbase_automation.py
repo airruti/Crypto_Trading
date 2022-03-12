@@ -3,8 +3,8 @@ import cbpro
 import time
 from multipledispatch import dispatch
 
-cryptos = ['BTC', 'DOGE', 'FET']
-time_to_wait = 0
+cryptos = ['BTC', 'DOGE', 'FET', 'IOTX', 'IMX', 'ETH', 'XLM', 'OGN']
+wait = 450
 
 class CBMoney:
     def __init__(self, coinbase_client):
@@ -14,16 +14,14 @@ class CBMoney:
         accounts = self.client.get_accounts()
         myAccounts = []
         for account in accounts:
-            if account['balance'] != '0.0000000000000000':
+            if round(float(account['balance']), 4) != 0:
                 myAccounts.append(account)
+                print(f"{account['currency']}: {round(float(account['balance']), 5)}")
         return myAccounts
     
     def viewSingleAccount(self, coin: str):
-        allAccounts = self.viewAccounts()
-        for account in allAccounts:
-            if account["currency"] == coin.upper():
-                return account
-        return f"You do not own any {coin}"
+        accounts = self.client.get_accounts()
+        return list(filter(lambda account: account['currency'] == coin, accounts)) #definitely did not steal this off stackoverflow
 
     #wooooow method overloading in python!! who woulda thunk!! 
     @dispatch()
@@ -32,7 +30,7 @@ class CBMoney:
         ticks = []
         for account in allAccounts:
             if account['currency'] == "USD":
-                continue
+                print(f"Total USD: {'${:,.2f}'.format(float(account['balance']))}")
             elif account['currency'] in cryptos:
                 ticks = self.client.get_product_ticker(product_id=f"{account['currency']}-USD")
                 print(f"Current Price of {account['currency']}: {ticks['bid']}")
@@ -53,38 +51,35 @@ class CBMoney:
     
     def viewOrder(self, order_id):
         pass
-    
+
+def countdown(time_sec):
+    while time_sec:
+        mins, secs = divmod(time_sec, 60)
+        timeformat = '{:02d}:{:02d}'.format(mins, secs)
+        print(timeformat, end='\r')
+        time.sleep(1)
+        time_sec -= 1
+
 def start():
     oldPriceBTC = richMethods.currentPrices("BTC")
-    oldPriceLINK = richMethods.currentPriceLINK()
     oldPriceBTC = float(oldPriceBTC)
-    oldPriceLINK = float(oldPriceLINK)
     
-    time.sleep(450)
+    time.sleep(wait)
     
-    old2PriceBTC = richMethods.currentPriceBTC()
-    old2PriceLINK = richMethods.currentPriceLINK()
+    old2PriceBTC = richMethods.currentPrices("BTC")
     old2PriceBTC = float(old2PriceBTC)
-    old2PriceLINK = float(old2PriceLINK)
     
-    time.sleep(450)
+    time.sleep(wait)
     
-    newPriceBTC = richMethods.currentPriceBTC()
-    newPriceLINK = richMethods.currentPriceLINK()
+    newPriceBTC = richMethods.currentPrices("BTC")
     newPriceBTC = float(newPriceBTC)
-    newPriceLINK = float(newPriceLINK)
     
     if(newPriceBTC < ((oldPriceBTC*0.99) or (old2PriceBTC*0.99))):
-        getBTC()
-    if(newPriceBTC > ((oldPriceBTC*1.02) or (old2PriceBTC*1.02))):
-        sellBTC()
-    if(newPriceLINK < ((oldPriceLINK*0.99) or (old2PriceLINK*0.99))):
-        getLINK()
-    if(newPriceLINK > ((oldPriceLINK*1.02) or (old2PriceLINK*1.02))):
-        sellLINK()
+        richMethods.marketOrder("BTC", 'buy', 10)
+    elif(newPriceBTC > ((oldPriceBTC*1.02) or (old2PriceBTC*1.02))):
+        richMethods.marketOrder("BTC", 'sell', 10)
         
-    displayInfo(newPriceBTC, newPriceLINK)
-    print('Waiting for changes...')
+    richMethods.currentPrices()
 
 def displayInfo(currentPriceBTC, currentPriceLINK):
     print(f"Current Bitcoin price: {currentPriceBTC}")
@@ -97,8 +92,7 @@ if __name__ == "__main__":
 
 richMethods = CBMoney(auth_client)
 print('Waiting for changes...')
+# while(True):
+#     start()
 
-richMethods.currentPrices()
-btc = richMethods.currentPrices("BTC")
-print(btc)
-        
+richMethods.viewAccounts()
