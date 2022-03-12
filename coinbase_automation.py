@@ -21,7 +21,9 @@ class CBMoney:
     
     def viewSingleAccount(self, coin: str):
         accounts = self.client.get_accounts()
-        return list(filter(lambda account: account['currency'] == coin, accounts)) #definitely did not steal this off stackoverflow
+        account = list(filter(lambda account: account['currency'] == coin.upper(), accounts)) #definitely did not steal this off stackoverflow
+        print(f"{account[0]['currency']}: {account[0]['balance']}")
+        return account
 
     #wooooow method overloading in python!! who woulda thunk!! 
     @dispatch()
@@ -96,3 +98,4 @@ print('Waiting for changes...')
 #     start()
 
 richMethods.viewAccounts()
+richMethods.viewSingleAccount("link")
