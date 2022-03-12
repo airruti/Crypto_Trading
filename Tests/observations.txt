@@ -1,0 +1,33 @@
+first test
+real portfolio start = 1388.00
+fake portfolio start = 808000.00
+
+.999 buy, 1.0015 sell
+
+real end = 1267; 121 diff
+fake end = 790000; 18000 diff
+
+121/1388 = .087175 <--- 8.71% decrease
+18000/808000 = .022238 <--- 2.22% decrease
+
+
+
+second test
+real portfolio start = 1290
+fake portfolio start = 782593
+
+start $= 295075
+
+.993 buy, 1.015 sell
+
+
+test3
+real start - 2064.87
+
+btc: 497.25 --> 0.01059924
+link: 281.55 --> 9.7300
+xlm: 146.95 --> 436.0000
+
+usd: 305.25
+
+
