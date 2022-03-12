@@ -1,89 +1,61 @@
-import auth_sandbox
+import auth_credentials
 import cbpro
 import time
+from multipledispatch import dispatch
 
-BTC = 'BTC-USD'
-LINK = 'LINK-USD'
-BUY = 'buy'
-SELL = 'sell'
-
-cryptos = ['BTC-USD', 'LINK-USD', 'XLM-USD']
+cryptos = ['BTC', 'DOGE', 'FET']
+time_to_wait = 0
 
 class CBMoney:
     def __init__(self, coinbase_client):
         self.client = coinbase_client
-        
-    def viewAccountBTC(self):
-        accounts = self.client.get_account('4e1ee09d-8018-4a2c-8b25-ff76b3df7ee3')
-        return accounts
+
+    def viewAccounts(self):
+        accounts = self.client.get_accounts()
+        myAccounts = []
+        for account in accounts:
+            if account['balance'] != '0.0000000000000000':
+                myAccounts.append(account)
+        return myAccounts
     
-    def viewAccountLINK(self):
-        accounts = self.client.get_account('a996ba51-de3a-4fcd-aef7-77dfa1c0558d')
-        return accounts
+    def viewSingleAccount(self, coin: str):
+        allAccounts = self.viewAccounts()
+        for account in allAccounts:
+            if account["currency"] == coin.upper():
+                return account
+        return f"You do not own any {coin}"
+
+    #wooooow method overloading in python!! who woulda thunk!! 
+    @dispatch()
+    def currentPrices(self):
+        allAccounts = self.viewAccounts()
+        ticks = []
+        for account in allAccounts:
+            if account['currency'] == "USD":
+                continue
+            elif account['currency'] in cryptos:
+                ticks = self.client.get_product_ticker(product_id=f"{account['currency']}-USD")
+                print(f"Current Price of {account['currency']}: {ticks['bid']}")
     
-    def viewAccountXLM(self):
-        accounts = self.client.get_account('a996ba51-de3a-4fcd-aef7-77dfa1c0558d')
-        return accounts
-    
-    def currentPriceBTC(self):
-        tick = self.client.get_product_ticker(product_id=cryptos[0])
+    @dispatch(str)
+    def currentPrices(self, coin):
+        tick = self.client.get_product_ticker(product_id=f"{coin}-USD")
         return tick['bid']
         
-    def currentPriceLINK(self):
-        tick = self.client.get_product_ticker(product_id=cryptos[1])
-        return tick['bid']
-        
-    def marketOrder(self, crypto, action, quantity):
-        trade = self.client.place_market_order(product_id=crypto, side=action, size=quantity)
-        return trade
+    def marketOrder(self, crypto, action, quantity): #must be a pair
+        self.client.place_market_order(product_id=f"{crypto}-USD", side=action, size=quantity)
+        print()
+        if action == 'buy':
+            print(f"buying {crypto}...")
+        else : 
+            print(f"selling {crypto}...")
+        print(self.viewSingleAccount(crypto))
     
     def viewOrder(self, order_id):
         pass
     
-def getXLM():
-    richMethods.marketOrder(cryptos[0], BUY, 1)
-    print()
-    print('buying XLM...')
-    print(richMethods.viewAccountXLM())
-    print()
-    
-def sellXLM():
-    richMethods.marketOrder(cryptos[0], SELL, 1)
-    print()
-    print('selling XLM...')
-    print(richMethods.viewAccountXLM())
-    print()
-    
-def getBTC():
-    richMethods.marketOrder(cryptos[0], BUY, 1)
-    print()
-    print('buying BTC...')
-    print(richMethods.viewAccountBTC())
-    print()
-    
-def sellBTC():
-    richMethods.marketOrder(cryptos[0], SELL, 1)
-    print()
-    print('selling BTC...')
-    print(richMethods.viewAccountBTC())
-    print()
-        
-def getLINK():
-    richMethods.marketOrder(cryptos[1], BUY, 1)
-    print()
-    print('buying LINK...')
-    print(richMethods.viewAccountLINK())
-    print()
-    
-def sellLINK():
-    richMethods.marketOrder(cryptos[1], SELL, 1)
-    print()
-    print('selling LINK...')
-    print(richMethods.viewAccountLINK())
-    print()
-    
 def start():
-    oldPriceBTC = richMethods.currentPriceBTC()
+    oldPriceBTC = richMethods.currentPrices("BTC")
     oldPriceLINK = richMethods.currentPriceLINK()
     oldPriceBTC = float(oldPriceBTC)
     oldPriceLINK = float(oldPriceLINK)
@@ -125,5 +97,8 @@ if __name__ == "__main__":
 
 richMethods = CBMoney(auth_client)
 print('Waiting for changes...')
-while(True):
-    start()
+
+richMethods.currentPrices()
+btc = richMethods.currentPrices("BTC")
+print(btc)
+        
