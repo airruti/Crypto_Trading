@@ -3,8 +3,8 @@ import cbpro
 import time
 from multipledispatch import dispatch
 
-cryptos = ['BTC', 'DOGE', 'FET', 'IOTX', 'IMX', 'ETH', 'XLM', 'OGN']
-wait = 450
+cryptos = ['BTC', 'DOGE', 'FET', 'IOTX', 'IMX', 'ETH', 'XLM', 'OGN'] #cryptos that will be used
+wait = 450 #7.5 minutes
 
 class CBMoney:
     def __init__(self, coinbase_client):
@@ -82,10 +82,6 @@ def start():
         richMethods.marketOrder("BTC", 'sell', 10)
         
     richMethods.currentPrices()
-
-def displayInfo(currentPriceBTC, currentPriceLINK):
-    print(f"Current Bitcoin price: {currentPriceBTC}")
-    print(f"Current Chainlink price: {currentPriceLINK}")
     
 if __name__ == "__main__":
     auth_client = cbpro.AuthenticatedClient(auth_credentials.money_key,
