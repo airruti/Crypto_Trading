@@ -3,8 +3,8 @@ import cbpro
 import time
 from multipledispatch import dispatch
 
-cryptos = {"BTC": 0.0002, "IMX": 3, "DOGE": 50} #cryptos that will be used and how many to sell
-wait = 900 #15 minutes
+cryptos = {"BTC": 0.0002, "IMX": 3, "DOGE": 50} #cryptos that will be used and how many to buy/sell
+wait = 300 #15 minutes
 
 class CBMoney:
     def __init__(self, coinbase_client):
@@ -85,7 +85,6 @@ def start():
         i += 1
         
     richMethods.currentPrices()
-    print()
     
 if __name__ == "__main__":
     auth_client = cbpro.AuthenticatedClient(auth_credentials.money_key,
