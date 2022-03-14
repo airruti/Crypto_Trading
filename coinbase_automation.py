@@ -4,7 +4,7 @@ import time
 from multipledispatch import dispatch
 
 cryptos = {"BTC": 0.0002, "IMX": 3, "DOGE": 50} #cryptos that will be used and how many to buy/sell
-wait = 300 #15 minutes
+wait = 450 #7.5 minutes each pass
 
 class CBMoney:
     def __init__(self, coinbase_client):
@@ -71,6 +71,21 @@ def start():
     for crypto in cryptos:
         old_prices.append(float(richMethods.currentPrices(crypto)))
     
+    countdown(wait)
+    
+    i = 0
+    for key, value in cryptos.items():
+        new_prices.append(float(richMethods.currentPrices(key)))
+
+        if(new_prices[i] < ((old_prices[i]*0.97))):
+            richMethods.marketOrder(key, 'buy', value)
+        elif(new_prices[i] > ((old_prices[i]*1.05))):
+            richMethods.marketOrder(key, 'sell', value)
+        
+        i += 1
+    
+    new_prices.clear()
+    richMethods.currentPrices()
     countdown(wait)
     
     i = 0
