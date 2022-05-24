@@ -1,10 +1,13 @@
+import sys
 import auth_credentials
 import cbpro
 import time
-from multipledispatch import dispatch
+from multipledispatch import dispatcher
+import model
 
-cryptos = {"BTC": 0.0002, "IMX": 3, "DOGE": 50} #cryptos that will be used and how many to buy/sell
-wait = 450 #7.5 minutes each pass
+cryptos = {"BTC": 0.0002} #cryptos that will be used and how many to buy/sell
+wait = 10 #7.5 minutes each pass
+types = sys.argv[1]
 
 class CBMoney:
     def __init__(self, coinbase_client):
@@ -50,7 +53,30 @@ class CBMoney:
             print(f"selling {crypto}...")
         print(self.viewSingleAccount(crypto))
 
-    def limitOrder(self, crypto, action, quantity):
+    def startMarket(self):
+        lr_price = model.LR
+        old_prices = []
+        new_prices = []
+
+        for key,value in cryptos.items():
+            old_prices.append(float(self.currentPrices(key)))
+
+        i = 0
+
+        for key, value in cryptos.items():
+            new_prices.append(float(self.currentPrices(key)))
+
+            if(new_prices[i] < ((old_prices[i]*0.97))):
+                self.marketOrder(key, 'buy', value)
+            elif(new_prices[i] > ((old_prices[i]*1.05))):
+                self.marketOrder(key, 'sell', value)
+            
+            i += 1
+    def startLimit():
+        pass
+    
+    def limitOrder(self, crypto, action, price, quantity):
+        self.client.place_limit_order(product_id=f"{crypto}-USD", side=action, price=price, size=quantity)
         pass
     
     def viewOrder(self, order_id):
@@ -65,49 +91,26 @@ def countdown(time_sec):
         time_sec -= 1
 
 def start():
-    old_prices = []
-    new_prices = []
-
-    for crypto in cryptos:
-        old_prices.append(float(richMethods.currentPrices(crypto)))
+    if types == "market":
+        richMethods.startMarket()
+    if types == "limit":
+        richMethods.startLimit()
     
     countdown(wait)
     
-    i = 0
-    for key, value in cryptos.items():
-        new_prices.append(float(richMethods.currentPrices(key)))
-
-        if(new_prices[i] < ((old_prices[i]*0.97))):
-            richMethods.marketOrder(key, 'buy', value)
-        elif(new_prices[i] > ((old_prices[i]*1.05))):
-            richMethods.marketOrder(key, 'sell', value)
-        
-        i += 1
-    
-    new_prices.clear()
     richMethods.currentPrices()
     countdown(wait)
-    
-    i = 0
-    for key, value in cryptos.items():
-        new_prices.append(float(richMethods.currentPrices(key)))
-
-        if(new_prices[i] < ((old_prices[i]*0.97))):
-            richMethods.marketOrder(key, 'buy', value)
-        elif(new_prices[i] > ((old_prices[i]*1.05))):
-            richMethods.marketOrder(key, 'sell', value)
-        
-        i += 1
         
     richMethods.currentPrices()
     
 if __name__ == "__main__":
     auth_client = cbpro.AuthenticatedClient(auth_credentials.money_key,
                                             auth_credentials.money_secret,
-                                            auth_credentials.money_pass)
+                                            auth_credentials.money_pass,
+                                            api_url="https://api-public.sandbox.pro.coinbase.com")
 
-richMethods = CBMoney(auth_client)
-while(True):
-    print('Waiting for changes...')
-    start()
-    print()
+    richMethods = CBMoney(auth_client)
+    while(True):
+        print('Waiting for changes...')
+        start()
+        print()
